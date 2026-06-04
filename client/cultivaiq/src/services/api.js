@@ -47,6 +47,18 @@ export const uploadImage = async (file) => {
   return data
 }
 
+export const fetchProfile = () =>
+  request('/profile', {
+    headers: authHeaders()
+  })
+
+export const updateProfile = (payload) =>
+  request('/profile', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(payload)
+  })
+
 export const predictDisease = (payload) =>
   request('/predict', {
     method: 'POST',

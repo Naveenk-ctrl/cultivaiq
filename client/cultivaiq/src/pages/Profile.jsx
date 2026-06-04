@@ -1,8 +1,5 @@
-import { useMemo, useState } from 'react'
-
-const PROFILE_KEY_PREFIX = 'cultivaiq_profile_'
-
-const normalizeEmail = (email) => (email ? email.trim().toLowerCase() : '')
+import { useEffect, useMemo, useState } from 'react'
+import { fetchProfile, updateProfile, uploadImage } from '../services/api'
 
 function Profile() {
   const user = useMemo(() => {
@@ -15,63 +12,105 @@ function Profile() {
     }
   }, [])
 
-  const normalizedEmail = normalizeEmail(user?.email)
-  const profileKey = normalizedEmail ? `${PROFILE_KEY_PREFIX}${normalizedEmail}` : null
-
-  const savedProfile = useMemo(() => {
-    if (!profileKey) return null
-    const raw = localStorage.getItem(profileKey)
-    if (!raw) return null
-    try {
-      return JSON.parse(raw)
-    } catch {
-      return null
-    }
-  }, [profileKey])
-
   const [form, setForm] = useState({
-    name: savedProfile?.name || user?.name || 'Farmer',
-    email: user?.email || savedProfile?.email || 'Not added yet',
-    photoUrl: savedProfile?.photoUrl || user?.photoUrl || '',
-    acres: savedProfile?.acres || user?.acres || '',
-    soilType: savedProfile?.soilType || user?.soilType || '',
-    location: savedProfile?.location || user?.location || '',
-    primaryCrop: savedProfile?.primaryCrop || user?.primaryCrop || ''
+    name: user?.name || 'Farmer',
+    email: user?.email || 'Not added yet',
+    photoUrl: user?.photoUrl || '',
+    acres: user?.acres || '',
+    soilType: user?.soilType || '',
+    location: user?.location || '',
+    primaryCrop: user?.primaryCrop || ''
   })
 
   const [isEditing, setIsEditing] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadProfile = async () => {
+      if (!user) return
+      try {
+        setIsLoading(true)
+        const data = await fetchProfile()
+        const profile = data?.user || {}
+        if (!isMounted) return
+        setForm((prev) => ({
+          ...prev,
+          ...profile,
+          email: profile.email || prev.email
+        }))
+      } catch (error) {
+        if (isMounted) {
+          setSaveError(error.message || 'Failed to load profile')
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadProfile()
+
+    return () => {
+      isMounted = false
+    }
+  }, [user])
 
   const handleChange = (event) => {
     setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }))
   }
 
-  const handleSave = () => {
-    const updated = {
-      name: form.name,
-      email: user?.email || form.email,
-      photoUrl: form.photoUrl,
-      acres: form.acres,
-      soilType: form.soilType,
-      location: form.location,
-      primaryCrop: form.primaryCrop
+  const handleSave = async () => {
+    try {
+      setIsSaving(true)
+      setSaveError('')
+      const payload = {
+        name: form.name,
+        photoUrl: form.photoUrl,
+        acres: form.acres,
+        soilType: form.soilType,
+        location: form.location,
+        primaryCrop: form.primaryCrop
+      }
+      const data = await updateProfile(payload)
+      const updated = data?.user || payload
+      setForm((prev) => ({
+        ...prev,
+        ...updated,
+        email: updated.email || prev.email
+      }))
+      localStorage.setItem('cultivaiq_user', JSON.stringify(updated))
+      setIsEditing(false)
+    } catch (error) {
+      setSaveError(error.message || 'Failed to save profile')
+    } finally {
+      setIsSaving(false)
     }
-    localStorage.setItem('cultivaiq_user', JSON.stringify(updated))
-    if (profileKey) {
-      localStorage.setItem(profileKey, JSON.stringify(updated))
-    }
-    setIsEditing(false)
   }
 
   const name = form.name || 'Farmer'
   const avatarFallback = name.slice(0, 1).toUpperCase()
 
-  const handlePhotoChange = (event) => {
+  const handlePhotoChange = async (event) => {
     const file = event.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      const photo = reader.result
+    try {
+      setIsUploading(true)
+      setUploadError('')
+      const result = await uploadImage(file)
+      const photo = result?.url || ''
+
+      if (!photo) {
+        throw new Error('Upload did not return a URL')
+      }
+
       setForm((prev) => {
         const updated = { ...prev, photoUrl: photo }
         if (profileKey) {
@@ -79,8 +118,11 @@ function Profile() {
         }
         return updated
       })
+    } catch (error) {
+      setUploadError(error.message || 'Failed to upload image')
+    } finally {
+      setIsUploading(false)
     }
-    reader.readAsDataURL(file)
   }
 
   return (
@@ -94,7 +136,7 @@ function Profile() {
           <div className="topbar-actions">
             {isEditing ? (
               <button className="btn btn-primary" type="button" onClick={handleSave}>
-                Save Details
+                {isSaving ? 'Saving...' : 'Save Details'}
               </button>
             ) : (
               <button className="btn btn-outline" type="button" onClick={() => setIsEditing(true)}>
@@ -116,7 +158,7 @@ function Profile() {
             <p className="muted">Upload a clear photo for your profile.</p>
             {isEditing && (
               <label className="btn btn-outline profile-upload" htmlFor="profilePhoto">
-                Change Photo
+                {isUploading ? 'Uploading...' : 'Change Photo'}
                 <input
                   id="profilePhoto"
                   type="file"
@@ -126,8 +168,11 @@ function Profile() {
                 />
               </label>
             )}
+            {uploadError && <p className="error">{uploadError}</p>}
+            {saveError && <p className="error">{saveError}</p>}
           </div>
         </div>
+        {isLoading && <p className="muted">Loading profile...</p>}
         <div className="profile-grid">
           <div className="profile-card">
             <p className="card-label">Full Name</p>
