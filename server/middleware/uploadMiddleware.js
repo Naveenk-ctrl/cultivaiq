@@ -1,31 +1,10 @@
 import multer from 'multer'
-import path from 'path'
-import fs from 'fs'
-import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const rootDir = path.resolve(__dirname, '..', '..')
-const uploadsDir = path.join(rootDir, 'uploads')
-
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true })
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir)
-  },
-  filename: (req, file, cb) => {
-    const safeName = file.originalname.replace(/\s+/g, '-').toLowerCase()
-    cb(null, `${Date.now()}-${safeName}`)
-  }
-})
+const storage = multer.memoryStorage()
 
 const fileFilter = (req, file, cb) => {
-  const allowed = ['.png', '.jpg', '.jpeg']
-  const ext = path.extname(file.originalname).toLowerCase()
-  if (!allowed.includes(ext)) {
+  const allowedMime = ['image/png', 'image/jpeg']
+  if (!allowedMime.includes(file.mimetype)) {
     return cb(new Error('Only .png, .jpg, .jpeg files are allowed'))
   }
   cb(null, true)
