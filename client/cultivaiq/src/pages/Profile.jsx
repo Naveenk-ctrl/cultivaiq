@@ -113,9 +113,7 @@ function Profile() {
 
       setForm((prev) => {
         const updated = { ...prev, photoUrl: photo }
-        if (profileKey) {
-          localStorage.setItem(profileKey, JSON.stringify(updated))
-        }
+        localStorage.setItem('cultivaiq_user', JSON.stringify(updated))
         return updated
       })
     } catch (error) {
@@ -155,7 +153,7 @@ function Profile() {
           </div>
           <div className="profile-avatar-meta">
             <p className="card-label">Profile Photo</p>
-            <p className="muted">Upload a clear photo for your profile.</p>
+            <p className="muted">Upload a clear photo for your profile (max 5MB).</p>
             {isEditing && (
               <label className="btn btn-outline profile-upload" htmlFor="profilePhoto">
                 {isUploading ? 'Uploading...' : 'Change Photo'}

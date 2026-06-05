@@ -2,11 +2,22 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const getToken = () => localStorage.getItem('cultivaiq_token')
 
+const parseResponse = async (response) => {
+  const text = await response.text()
+  if (!text) return null
+  try {
+    return JSON.parse(text)
+  } catch {
+    return text
+  }
+}
+
 const request = async (path, options = {}) => {
   const response = await fetch(`${API_BASE}${path}`, options)
-  const data = await response.json()
+  const data = await parseResponse(response)
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed')
+    const message = typeof data === 'string' ? data : data?.message
+    throw new Error(message || 'Request failed')
   }
   return data
 }
@@ -39,9 +50,10 @@ export const uploadImage = async (file) => {
     body: formData
   })
 
-  const data = await response.json()
+  const data = await parseResponse(response)
   if (!response.ok) {
-    throw new Error(data.message || 'Upload failed')
+    const message = typeof data === 'string' ? data : data?.message
+    throw new Error(message || 'Upload failed')
   }
 
   return data

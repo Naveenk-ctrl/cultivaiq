@@ -7,7 +7,7 @@ export const uploadImage = (req, res) => {
 
   const uploadStream = cloudinary.uploader.upload_stream(
     {
-      folder: 'cultivaiq/uploads',
+      folder: 'cultivaiq/profile',
       resource_type: 'image'
     },
     (error, result) => {

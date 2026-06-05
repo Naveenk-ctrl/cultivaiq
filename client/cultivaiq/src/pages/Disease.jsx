@@ -1,11 +1,19 @@
 import { useState } from 'react'
-import { uploadImage, predictDisease } from '../services/api.js'
+import { predictDisease } from '../services/api.js'
 
 function Disease() {
   const [file, setFile] = useState(null)
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const readFileAsDataUrl = (selectedFile) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = () => reject(new Error('Failed to read image file'))
+      reader.readAsDataURL(selectedFile)
+    })
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -17,8 +25,8 @@ function Disease() {
     setError('')
     setLoading(true)
     try {
-      const upload = await uploadImage(file)
-      const response = await predictDisease({ imagePath: upload.file.path })
+      const imageBase64 = await readFileAsDataUrl(file)
+      const response = await predictDisease({ imageBase64, filename: file.name })
       setResult(response.prediction)
     } catch (err) {
       setError(err.message)

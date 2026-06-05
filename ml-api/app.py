@@ -19,7 +19,13 @@ def health():
 @app.post("/predict")
 def predict_disease():
     payload = request.get_json(silent=True) or {}
-    image_path = payload.get("imagePath", "unknown")
+    image_path = payload.get("imagePath")
+    if not image_path:
+        image_path = payload.get("filename")
+    if not image_path and payload.get("imageBase64"):
+        image_path = "inline-upload"
+    if not image_path:
+        image_path = "unknown"
     return jsonify({
         "imagePath": image_path,
         "disease": "Leaf Blight",
