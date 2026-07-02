@@ -7,15 +7,6 @@ Smart Farming Assistant System.
 ### Server (.env)
 Create `server/.env` with:
 
-```
-PORT=5000
-MONGO_URI=your_mongodb_atlas_uri
-JWT_SECRET=your_jwt_secret
-CLIENT_ORIGIN=http://localhost:5173
-ML_API_URL=http://localhost:7000
-OPENWEATHER_API_KEY=your_openweather_api_key
-DATA_GOV_API_KEY=your_data_gov_api_key
-```
 
 ### Client (.env)
 Create `client/cultivaiq/.env` with:
