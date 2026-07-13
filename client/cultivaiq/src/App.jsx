@@ -3,7 +3,6 @@ import Layout from './components/Layout.jsx'
 import Chatbot from './pages/Chatbot.jsx'
 import Crop from './pages/Crop.jsx'
 import Dashboard from './pages/Dashboard.jsx'
-import Disease from './pages/Disease.jsx'
 import Landing from './pages/Landing.jsx'
 import Login from './pages/Login.jsx'
 import Market from './pages/Market.jsx'
@@ -28,7 +27,6 @@ function App() {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/disease" element={<Disease />} />
           <Route path="/crop" element={<Crop />} />
           <Route path="/chatbot" element={<Chatbot />} />
           <Route path="/weather" element={<Weather />} />

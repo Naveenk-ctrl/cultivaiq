@@ -1,5 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { sendChat } from '../services/api.js'
+
+function StreamingBotMessage({ text, renderBotMessage, shouldStream }) {
+  const [visibleText, setVisibleText] = useState(shouldStream ? '' : text)
+
+  useEffect(() => {
+    if (!shouldStream) {
+      setVisibleText(text)
+      return
+    }
+
+    let currentIndex = 0
+    const timer = setInterval(() => {
+      currentIndex += 1
+      setVisibleText(text.slice(0, currentIndex))
+      if (currentIndex >= text.length) {
+        clearInterval(timer)
+      }
+    }, 12)
+
+    return () => clearInterval(timer)
+  }, [text, shouldStream])
+
+  const isStreaming = shouldStream && visibleText.length < text.length
+
+  return (
+    <>
+      {renderBotMessage(visibleText)}
+      {isStreaming && <span className="chat-stream-caret" aria-hidden="true" />}
+    </>
+  )
+}
 
 function Chatbot() {
   const [message, setMessage] = useState('')
@@ -69,6 +100,7 @@ function Chatbot() {
     const current = message
     setMessage('')
     setLoading(true)
+    setHistory((prev) => [...prev, { from: 'user', text: current }])
 
     try {
       const response = await sendChat({ message: current })
@@ -79,13 +111,11 @@ function Chatbot() {
         'No response received.'
       setHistory((prev) => [
         ...prev,
-        { from: 'user', text: current },
         { from: 'bot', text: reply }
       ])
     } catch (err) {
       setHistory((prev) => [
         ...prev,
-        { from: 'user', text: current },
         { from: 'bot', text: err.message }
       ])
     } finally {
@@ -97,22 +127,37 @@ function Chatbot() {
     <div className="page">
       <section className="panel">
         <div className="panel-header">
-          <h2>AI Chatbot</h2>
+          <h2>CultivAIQ AI Chatbot</h2>
         </div>
         <div className="chat-window">
           {history.length === 0 && (
-            <p className="muted">Ask about crop care or weather.</p>
+            <p className="muted">Feel free to ask agriculture related queries.</p>
           )}
           {history.map((item, index) => (
             <div key={`${item.from}-${index}`} className={`chat-bubble ${item.from}`}>
-              {item.from === 'bot' ? renderBotMessage(item.text) : <p>{item.text}</p>}
+              {item.from === 'bot' ? (
+                <StreamingBotMessage
+                  text={item.text}
+                  renderBotMessage={renderBotMessage}
+                  shouldStream={index === history.length - 1 && !loading}
+                />
+              ) : (
+                <p>{item.text}</p>
+              )}
             </div>
           ))}
+          {loading && (
+            <div className="chat-bubble bot typing" aria-live="polite">
+              <span className="chat-typing-dot" />
+              <span className="chat-typing-dot" />
+              <span className="chat-typing-dot" />
+            </div>
+          )}
         </div>
         <form className="chat-form" onSubmit={handleSend}>
           <input
             type="text"
-            placeholder="Type your question..."
+            placeholder="Ask about crops, soil, pests, weather, or market prices..."
             value={message}
             onChange={(event) => setMessage(event.target.value)}
           />

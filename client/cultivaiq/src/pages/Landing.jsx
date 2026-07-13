@@ -32,7 +32,7 @@ function Landing() {
       <main className="landing-main">
         <section className="landing-hero">
           <div className="hero-content">
-            <p className="eyebrow">AI + ML + Computer Vision</p>
+            <p className="eyebrow">AI + ML</p>
             <h1>Grow smarter decisions with real-time farm intelligence.</h1>
             <p className="hero-text">
               CultivAIQ brings crop recommendations, weather insights, market prices,
@@ -65,25 +65,35 @@ function Landing() {
           <div className="hero-card">
             <img src={leafLines} alt="Leaf lines" className="hero-lines" />
             <div className="hero-card-content">
-              <p className="card-label">Today</p>
-              <h2>Field Snapshot</h2>
+              
+              <h2>Soil Data</h2>
               <div className="card-grid">
                 <div>
-                  <span>Soil Moisture</span>
-                  <strong>58%</strong>
+                  <span>Humidity:</span>
+                  <strong>58.8</strong>
                 </div>
                 <div>
-                  <span>Leaf Health</span>
-                  <strong>Stable</strong>
+                  <span>Nitrogen:</span>
+                  <strong>63</strong>
                 </div>
                 <div>
-                  <span>Crop Suggestion</span>
-                  <strong>Millet</strong>
+                  <span>Phosphorus:</span>
+                  <strong>52</strong>
+                </div>
+                
+                <div>
+                  <span>PH:</span>
+                  <strong>6.96</strong>
                 </div>
                 <div>
-                  <span>Weather</span>
-                  <strong>Clear</strong>
+                  <span>Rainfall:</span>
+                  <strong>63.87</strong>
                 </div>
+                <div>
+                  <span>Crop Suggestion:</span>
+                  <strong>Maize</strong>
+                </div>
+
               </div>
             </div>
           </div>
@@ -127,13 +137,13 @@ function Landing() {
               <span>Market Price Updates</span>
               <span>AI Chatbot</span>
               <span>Farmer Dashboard</span>
-              <span>Disease Detection</span>
+              
             </div>
           </div>
           <div className="feature-cards">
             <div>
               <h3>Recommendations that fit</h3>
-              <p>Crop suggestions based on season, location, and field needs.</p>
+              <p>Crop suggestions based on Soil parameters,Rain fall data.</p>
             </div>
             <div>
               <h3>Weather + market in one view</h3>
@@ -188,10 +198,7 @@ function Landing() {
               <h3>Encrypted Passwords</h3>
               <p>Passwords are hashed with bcrypt before storage.</p>
             </div>
-            <div>
-              <h3>Upload Validation</h3>
-              <p>Image-only uploads with size and type checks.</p>
-            </div>
+            
           </div>
         </section>
       </main>

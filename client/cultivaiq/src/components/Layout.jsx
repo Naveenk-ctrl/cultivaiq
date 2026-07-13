@@ -4,7 +4,6 @@ import logo from '../assets/logo.png'
 const navItems = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/profile', label: 'Profile' },
-  { to: '/disease', label: 'Disease Check' },
   { to: '/crop', label: 'Crop Recommendation' },
   { to: '/chatbot', label: 'AI Chatbot' },
   { to: '/weather', label: 'Weather' },

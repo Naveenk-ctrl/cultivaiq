@@ -10,6 +10,7 @@ function Login({ initialMode = 'login' }) {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [message, setMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
 
   const handleChange = (event) => {
@@ -19,6 +20,7 @@ function Login({ initialMode = 'login' }) {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setMessage('')
+    setIsSubmitting(true)
 
     try {
       const response =
@@ -54,6 +56,8 @@ function Login({ initialMode = 'login' }) {
       setTimeout(() => navigate('/dashboard'), 600)
     } catch (err) {
       setMessage(err.message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -111,12 +115,24 @@ function Login({ initialMode = 'login' }) {
               </button>
             </div>
           </label>
-          <button className="btn btn-primary" type="submit">
-            {mode === 'login' ? 'Sign in' : 'Create account'}
+          <button
+            className={`btn btn-primary ${isSubmitting ? 'btn-loading' : ''}`}
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <span className="btn-spinner" aria-hidden="true" />
+                <span>{mode === 'login' ? 'Signing in...' : 'Creating account...'}</span>
+              </>
+            ) : (
+              mode === 'login' ? 'Sign in' : 'Create account'
+            )}
           </button>
           <button
             className="btn btn-ghost"
             type="button"
+            disabled={isSubmitting}
             onClick={() =>
               setMode((prev) => (prev === 'login' ? 'register' : 'login'))
             }
